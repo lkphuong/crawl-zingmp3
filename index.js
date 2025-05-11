@@ -3,6 +3,13 @@ const fs = require("fs").promises;
 const path = require("path");
 const slugify = require("slugify");
 
+const singer =
+  "#body-scroll > div.container > div.container.page-search > div.container.mar-t-30 > div > div:nth-child(1) > div > div.media-left > div.card-info > h3";
+const playSong =
+  "div > div.media-left > div.song-thumb > div.zm-actions-container > div > button.zm-btn.action-play.button";
+const playKaraoke =
+  "#root > div.zm-section.zm-layout.has-player > div.zm-section.now-playing-bar > div.player-controls.clickable > div > div.player-controls-right.level-right > div:nth-child(2) > button";
+
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 async function openZingMp3Search(songName) {
@@ -23,19 +30,11 @@ async function openZingMp3Search(songName) {
     // Navigate to the URL
     await page.goto(url, { waitUntil: "networkidle2" });
 
-    console.log("Page opened successfully:", url);
     await sleep(5000);
-
+    console.log("Page opened successfully:", url);
     // Wait for and close the popup if it appears
     try {
-      await page.waitForSelector(
-        "#root > div.promotion-home-popup-container > div > button",
-        { timeout: 5000 }
-      );
-      await page.click(
-        "#root > div.promotion-home-popup-container > div > button"
-      );
-      console.log("Popup closed.");
+      await page.mouse.click(100, 100);
     } catch (e) {
       console.log("No popup found or failed to close popup.");
     }
@@ -43,43 +42,31 @@ async function openZingMp3Search(songName) {
     // await sleep(5000);
 
     // Wait for the first song in the "Bài Hát" section
-    await page.waitForSelector(
-      ".container.mar-t-30 .list-item.media-item.hide-right.full-left .action-play",
-      { timeout: 50000 }
-    );
-    // await sleep(5000);
-
-    // Get the text content of the first song's title
-    // const firstSongArtists = await page.evaluate(() => {
-    //   const firstSongElement = document.querySelector(
-    //     ".container.mar-t-30 .list-item.media-item.hide-right.full-left .subtitle"
-    //   );
-    //   if (!firstSongElement) return [];
-    //   const artistLinks = firstSongElement.querySelectorAll("a.is-ghost");
-    //   return Array.from(artistLinks).map((link) => link.textContent.trim());
-    // });
-    // console.log("First song artists:", firstSongArtists.join(", "));
-
-    // Click the play button of the first song
-    await page.click(
-      ".container.mar-t-30 .list-item.media-item.hide-right.full-left .action-play"
-    );
+    await page.waitForSelector(playSong, { timeout: 5000 });
+    await page.click(playSong);
     console.log("Clicked on the first song in the 'Bài Hát' section.");
 
-    // await sleep(5000);
+    // Get the text content of the first song's title
+    const artistNames = await page.evaluate(() => {
+      const item = document.querySelector(
+        ".list-item.media-item.hide-right.full-left"
+      );
+      if (!item) return null;
+
+      const artistLinks = item.querySelectorAll("h3.subtitle a.is-ghost");
+      return Array.from(artistLinks).map((el) => el.textContent.trim());
+    });
+    console.log("Artist Names:", artistNames.join(", "));
 
     // Wait for the player controls to load
-    await page.waitForSelector(
-      "#root > div.zm-section.zm-layout.has-player > div.zm-section.now-playing-bar > div.player-controls.clickable > div > div.player-controls-right.level-right > div:nth-child(2) > button",
-      { timeout: 50000 }
-    );
+    await page.waitForSelector(playKaraoke, {
+      timeout: 10000,
+    });
 
     // await sleep(5000);
 
     // Click the play/pause button
-    await page.click(
-      "#root > div.zm-section.zm-layout.has-player > div.zm-section.now-playing-bar > div.player-controls.clickable > div > div.player-controls-right.level-right > div:nth-child(2) > button"
-    );
+    await page.click(playKaraoke);
     console.log("Clicked play/pause button.");
 
     // Monitor network requests without enabling request interception
@@ -90,7 +77,6 @@ async function openZingMp3Search(songName) {
         try {
           // Get the text content of the .lrc file
           const lrcContent = await response.text();
-          console.log("LRC Content Preview:", lrcContent.slice(0, 100)); // Log first 100 chars
 
           // Generate a safe filename from the URL or song name
           const fileName = `${slugify(songName)}.lrc`;
@@ -117,5 +103,5 @@ async function openZingMp3Search(songName) {
   }
 }
 
-const songName = "không phải dạng vừa đâu";
+const songName = "thu cuối";
 openZingMp3Search(songName);
