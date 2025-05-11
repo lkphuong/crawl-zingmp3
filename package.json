@@ -1,0 +1,16 @@
+{
+  "name": "crawl-zingmp3",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "puppeteer": "^24.8.2",
+    "slugify": "^1.6.6"
+  }
+}
