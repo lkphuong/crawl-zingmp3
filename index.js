@@ -79,11 +79,15 @@ async function openZingMp3Search(songName) {
           const lrcContent = await response.text();
 
           // Generate a safe filename from the URL or song name
-          const fileName = `${slugify(songName)}.lrc`;
+          const fileName = `${slugify(artistNames + "-" + songName)}.lrc`;
           const filePath = path.join(__dirname, "lyrics", fileName);
 
           // Ensure the lyrics directory exists
-          await fs.mkdir(path.join(__dirname, "lyrics"), { recursive: true });
+          await fs.mkdir(path.join(__dirname, "lyrics"), {
+            recursive: true,
+            lowercase: true,
+            strict: false,
+          });
 
           // Save the .lrc file
           await fs.writeFile(filePath, lrcContent);
@@ -103,5 +107,5 @@ async function openZingMp3Search(songName) {
   }
 }
 
-const songName = "thu cuối";
+const songName = "đơn giản anh yêu em";
 openZingMp3Search(songName);
